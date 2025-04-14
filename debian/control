@@ -9,21 +9,24 @@ Build-Depends:
  debhelper-compat (= 13),
  dh-exec,
 Build-Depends-Arch:
- android-libboringssl-dev (>= 12) [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
- clang [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el s390x ppc64 sparc64 riscv64],
- libbrotli-dev [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
+ 7zip (>= 22.01+dfsg-9) [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ android-libboringssl-dev (>= 12) [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ clang [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el s390x ppc64 sparc64 riscv64],
+ libbrotli-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ libcap-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
  libgtest-dev,
- liblz4-dev [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
+ liblz4-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
  libpng-dev,
- libprotobuf-dev (>= 3.12) [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
- libsquashfuse-dev [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
- libusb-1.0-0-dev [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
- libzstd-dev [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
- lld [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el],
- pandoc [amd64 i386 armel armhf arm64 ia64 mipsel mips64el ppc64el s390x ppc64],
- protobuf-compiler (>= 3.12) [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64],
+ libprotobuf-dev (>= 3.12) [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ libsquashfuse-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ libsystemd-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ libusb-1.0-0-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ libzstd-dev [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
+ lld [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el],
+ pandoc [amd64 i386 armel armhf arm64 ia64 loong64 mipsel mips64el ppc64el s390x ppc64 riscv64],
+ protobuf-compiler (>= 3.12) [amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64],
  python3 [amd64 i386 arm64],
- ronn [alpha arc hppa hurd-i386 kfreebsd-amd64 kfreebsd-i386 m68k powerpc riscv64 sh4 sparc64 x32],
+ ronn [alpha arc hppa hurd-i386 kfreebsd-amd64 kfreebsd-i386 m68k powerpc sh4 sparc64 x32],
 Standards-Version: 4.6.2
 Rules-Requires-Root: no
 Vcs-Git: https://salsa.debian.org/android-tools-team/android-platform-tools.git
@@ -111,19 +114,46 @@ Description: Android utils library for C - Development files
 
 Package: adb
 Section: utils
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends},
          android-libcutils (= ${binary:Version}),
-Recommends: android-sdk-platform-tools-common (>= 28.0.2~)
+         android-udev-rules,
 Provides: android-tools-adb
 Description: Android Debug Bridge
  A versatile command line tool that lets you communicate with an emulator
  instance or connected Android-powered device.
  .
- This package recommends "android-sdk-platform-tools-common" which contains
+ This package depends on "android-udev-rules" which contains
  the udev rules for Android devices. Without this package, adb and fastboot need
  to be running with root permission.
+
+Package: adbd
+Section: utils
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends},
+         android-libcutils (= 1:${binary:Version}),
+Breaks: android-tools-adbd (<< 6.0~)
+Replaces: android-tools-adbd (<< 6.0~)
+Provides: android-tools-adbd
+Description: Android Debug Bridge daemon
+ Android Debug Bridge (adb) is a versatile tool that lets you manage the state
+ of an emulator instance or Android-powered device. It is a client-server
+ program that includes three components:
+ .
+ A client, which runs on your development machine. You can invoke a
+ client from a shell by issuing an adb command. Other Android tools such
+ as the ADT plugin and DDMS also create adb clients.
+ .
+ A server, which runs as a background process on your development
+ machine. The server manages communication between the client and the
+ adb daemon running on an emulator or device.
+ .
+ A daemon, which runs as a background process on each emulator or device
+ instance.
+ .
+ This package provides the daemon component.
 
 Package: android-libsparse
 Section: libs
@@ -156,7 +186,7 @@ Description: Library for sparse files - Development files
 
 Package: android-libutils
 Section: libs
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends},
          android-libbacktrace (= ${binary:Version}),
@@ -169,7 +199,7 @@ Description: Android Utility Function Library
 
 Package: android-libutils-dev
 Section: libdevel
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: same
 Depends: ${misc:Depends},
          android-libbacktrace-dev (= ${binary:Version}),
@@ -228,6 +258,7 @@ Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
 Breaks: android-libunwind-dev (<< 10.0.0+r36-5)
+Replaces: android-libunwind-dev (<< 10.0.0+r36-5)
 Description: Shared headers in AOSP repository platform/system/core
  This package contains header files in AOSP repository platform/system/core that
  do not belong to any specific libraries but used by other programs.
@@ -236,9 +267,10 @@ Description: Shared headers in AOSP repository platform/system/core
 
 Package: android-libbacktrace
 Section: libs
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends},
+         7zip,
          android-libbase (= ${binary:Version}),
 Breaks: android-libbacktrace-dev (<< 1:33)
 Description: Android backtrace library
@@ -247,7 +279,7 @@ Description: Android backtrace library
 
 Package: android-libbacktrace-dev
 Section: libdevel
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: same
 Depends: ${misc:Depends},
          android-libbacktrace (= ${binary:Version}),
@@ -343,20 +375,20 @@ Description: Creates Android boot images
 
 Package: fastboot
 Section: utils
-Architecture: amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64
+Architecture: amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends},
          android-libcutils (= ${binary:Version}),
          android-libsparse (= ${binary:Version}),
          android-libziparchive (= ${binary:Version}),
-Recommends: android-sdk-platform-tools-common (>= 28.0.2~)
-Suggests: android-sdk-platform-tools
+         android-udev-rules,
+Suggests: android-sdk-platform-tools [amd64 i386 armel armhf arm64 mipsel mips64el ppc64el]
 Provides: android-tools-fastboot
 Description: Android fastboot tool
  A command line tool for flashing an Android device, boot an Android device to
  fastboot mode, etc..
  .
- This package recommends "android-sdk-platform-tools-common" which contains
+ This package depends on "android-udev-rules" which contains
  the udev rules for Android devices. Without this package, adb and fastboot need
  to be running with root permission.
 
