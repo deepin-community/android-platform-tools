@@ -1,3 +1,178 @@
+android-platform-tools (34.0.5-12) unstable; urgency=medium
+
+  * debian/control:
+    - Replace "android-sdk-platform-tools-common" with "android-udev-rules"
+      and bump from "Recommends" to "Depends" as well.
+
+ -- Roger Shimizu <rosh@debian.org>  Thu, 03 Apr 2025 23:03:19 -0700
+
+android-platform-tools (34.0.5-11) unstable; urgency=medium
+
+  * adb manpage: Make NAME one line to resolve lintian warning.
+  * Update adbd.service:
+    - Start adbd service after network is connected.
+    - Add doc entry to service to resolve lintian warning.
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 30 Mar 2025 18:14:16 -0700
+
+android-platform-tools (34.0.5-10) unstable; urgency=medium
+
+  * man: Use packages/modules/adb/docs/user/adb.1.md
+  * Revert: Try to add alpha sh4 for adb/fastboot, due to no clang support.
+
+ -- Roger Shimizu <rosh@debian.org>  Wed, 26 Mar 2025 00:43:12 -0700
+
+android-platform-tools (34.0.5-9) unstable; urgency=medium
+
+  * Upload to unstable.
+  * debian/control:
+    - Limit android-sdk-platform-tools Suggests to ARCHs exists.
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 23 Mar 2025 21:12:23 -0700
+
+android-platform-tools (34.0.5-9~exp1) experimental; urgency=medium
+
+  * Try to add alpha sh4 for adb/fastboot.
+
+ -- Roger Shimizu <rosh@debian.org>  Sat, 22 Mar 2025 01:52:31 -0700
+
+android-platform-tools (34.0.5-8) unstable; urgency=medium
+
+  * debian/control:
+    - Add missing Replaces to android-platform-system-core-headers
+      (Closes: #1100892).
+
+ -- Roger Shimizu <rosh@debian.org>  Fri, 21 Mar 2025 00:46:04 -0700
+
+android-platform-tools (34.0.5-7) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Roger Shimizu <rosh@debian.org>  Thu, 20 Mar 2025 23:10:42 -0700
+
+android-platform-tools (34.0.5-7~exp1) experimental; urgency=medium
+
+  * Add loong64 for adb/fastboot.
+
+ -- Roger Shimizu <rosh@debian.org>  Mon, 17 Mar 2025 22:24:26 -0700
+
+android-platform-tools (34.0.5-6) unstable; urgency=medium
+
+  * Fix the autopkgtest.
+
+ -- Roger Shimizu <rosh@debian.org>  Sat, 28 Dec 2024 00:27:41 -0800
+
+android-platform-tools (34.0.5-5) unstable; urgency=medium
+
+  * Revert "Revert "d/tests/control & d/rules: Add tests for adbd""
+    Now there's adbd in testing, so we can have this test.
+
+ -- Roger Shimizu <rosh@debian.org>  Thu, 26 Dec 2024 01:23:20 -0800
+
+android-platform-tools (34.0.5-4) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Revert "d/tests/control & d/rules: Add tests for adbd"
+    Tentatively for testing migration.
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 22 Dec 2024 23:05:31 -0800
+
+android-platform-tools (34.0.5-4~exp2) experimental; urgency=medium
+
+  * Simplify adb/adbd makefiles.
+    - Remove debian/system/libadbd.mk.
+    - Put common part of adb.mk and adbd.mk into libadb.mk.
+    - Leave diff part only in adb.mk and adbd.mk.
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 22 Dec 2024 21:56:34 -0800
+
+android-platform-tools (34.0.5-4~exp1) experimental; urgency=medium
+
+  [ Julien Massot ]
+  * debian: build adbd package.
+    While this requires a few patches in order to actually build on
+    non-Android systems, `adbd` can be a useful tool for embedded
+    developement and probably other use cases.
+    As it was previously shipped as `android-tools-adbd` (up until upstream
+    version 5.1.1), we also need to conflict with and replace this package
+    with the new one.
+    Package `adbd` built from this commit has been successfully tested on
+    amd64 computers (using network transport) and arm64 devices (PinePhone
+    Pro, using USB transport).
+
+  [ Roger Shimizu ]
+  * debian/tests/control & debian/rules: Add tests for adbd.
+
+ -- Roger Shimizu <rosh@debian.org>  Fri, 04 Oct 2024 01:42:45 -0700
+
+android-platform-tools (34.0.5-3) unstable; urgency=medium
+
+  * debian/control: B-D 7zip (>= 22.01+dfsg-9)
+  * debian/rules: Remove -lto from linking option.
+  * debian/include: Revert Add chrono header for gcc-13.
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 29 Sep 2024 21:35:57 -0700
+
+android-platform-tools (34.0.5-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Roger Shimizu <rosh@debian.org>  Mon, 23 Sep 2024 00:50:43 -0700
+
+android-platform-tools (34.0.5-2~exp1) experimental; urgency=medium
+
+  * Use 7z.so from 7zip to replace external/lzma.
+
+ -- Roger Shimizu <rosh@debian.org>  Fri, 20 Sep 2024 01:22:40 -0700
+
+android-platform-tools (34.0.5-1) unstable; urgency=medium
+
+  * debian/patches: Add two revert patches to fix autopkgtest errors.
+
+ -- Roger Shimizu <rosh@debian.org>  Thu, 19 Sep 2024 22:23:38 -0700
+
+android-platform-tools (34.0.5-1~exp1) unstable; urgency=medium
+
+  * New upstream release 34.0.5
+  * debian/patches:
+    - Refresh patches.
+    - Add 2 revert patches to support mips.
+    - Add 2 revert patches to make build for ADB.
+  * debian/system/*.mk: Update.
+
+ -- Roger Shimizu <rosh@debian.org>  Thu, 19 Sep 2024 02:56:59 -0700
+
+android-platform-tools (34.0.4-2) unstable; urgency=medium
+
+  [ Anurag Kumar ]
+  * fix(adb bash-completion): remove old/deprecated commands and add new ones
+  * fix(adb bash-completion): add device, forward subcommand & options
+  * adb completion: add adb reverse command and suboptions
+  * adb completion: add mdns command and suboptions
+  * adb bash-completion: remove adb backup command: deprecated
+  * adb bash-completion: add options in pull command
+  * adb bash-comp: refactor adb push
+  * adb bash-comp: add adb sync command and suboptions
+  * adb bash-comp: add adb shell command suboptions
+  * adb bash-comp: refactor adb install/uninstall subcommands
+  * adb bash-comp: add remaining commands
+  * adb bash-comp: remove mdns commands for now
+
+  [ Arnaud Ferraris ]
+  * d/patches: Drop gki dependency from mkbootimg (Closes: #1050300)
+
+  [ Roger Shimizu ]
+  * d/control: Fix ftbfs issue on loong64 (Closes: #1069143)
+
+ -- Roger Shimizu <rosh@debian.org>  Wed, 18 Sep 2024 00:37:52 -0700
+
+android-platform-tools (34.0.4-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Add patch to build against GCC-14 (Closes: #1074811)
+
+ -- tony mancill <tmancill@debian.org>  Thu, 15 Aug 2024 21:12:28 -0700
+
 android-platform-tools (34.0.4-1) unstable; urgency=medium
 
   * Upload to unstable.

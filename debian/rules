@@ -4,8 +4,8 @@ include /usr/share/dpkg/architecture.mk
 include /usr/share/dpkg/pkg-info.mk
 
 ## Security Hardening
-export DEB_BUILD_MAINT_OPTIONS = hardening=+all optimize=-lto
-# https://android.googlesource.com/platform/build/soong/+/refs/tags/platform-tools-34.0.4/cc/config/global.go#301
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+# https://android.googlesource.com/platform/build/soong/+/refs/tags/platform-tools-34.0.5/cc/config/global.go#356
 export DEB_CFLAGS_MAINT_APPEND = -fPIC -std=gnu17
 export DEB_CXXFLAGS_MAINT_APPEND = -fPIC -std=gnu++2a
 export DEB_LDFLAGS_MAINT_APPEND = -fPIC
@@ -14,8 +14,6 @@ export DEB_CPPFLAGS_MAINT_APPEND = -DNDEBUG -UDEBUG \
   -fno-exceptions \
   -fno-strict-aliasing \
   -no-canonical-prefixes \
-  \
-  -Idebian/include # Workaround for #1037576 \
 
 ## For get-orig-source
 export DEB_SOURCE
@@ -23,8 +21,8 @@ export DEB_SOURCE
 ## system
 export DEB_HOST_MULTIARCH
 export DEB_VERSION
-# https://android.googlesource.com/platform/development/+/refs/tags/platform-tools-34.0.4/sdk/plat_tools_source.prop_template
-export PLATFORM_TOOLS_VERSION = 34.0.4
+# https://android.googlesource.com/platform/development/+/refs/tags/platform-tools-34.0.5/sdk/plat_tools_source.prop_template
+export PLATFORM_TOOLS_VERSION = 34.0.5
 
 ifneq (, $(shell which clang))
   export CC = clang
@@ -75,7 +73,7 @@ else
 	ronn -r $<
 endif
 
-s/libbacktrace.so: debian/system/libbacktrace.mk s/libcutils.so e/liblzma.so e/libcpu_features.so
+s/libbacktrace.so: debian/system/libbacktrace.mk s/libcutils.so e/libcpu_features.so
 	dh_auto_build --buildsystem=makefile -- --file=$<
 
 s/libbase.so: debian/system/libbase.mk s/liblog.so
@@ -85,6 +83,9 @@ s/libcutils.so: debian/system/libcutils.mk s/libbase.so
 	dh_auto_build --buildsystem=makefile -- --file=$<
 
 s/adb: debian/system/adb.mk s/libziparchive.so s/libadb.a s/libcrypto_utils.a s/libcutils.so debian/manpages/system/adb.1
+	dh_auto_build --buildsystem=makefile -- --file=$<
+
+s/adbd: debian/system/adbd.mk s/libadb.a s/libcrypto_utils.a s/libcutils.so
 	dh_auto_build --buildsystem=makefile -- --file=$<
 
 s/fastboot: debian/system/fastboot.mk s/adb s/extras/libext4_utils.a s/libsparse.so debian/manpages/system/fastboot.1
@@ -104,7 +105,6 @@ s/append2simg: debian/system/append2simg.mk s/simg2img
 
 COMPONENTS = \
   e/libcpu_features.so \
-  e/liblzma.so \
   s/append2simg \
   s/img2simg \
   s/libbacktrace.so \
@@ -118,8 +118,8 @@ COMPONENTS = \
   s/simg2simg \
 
 # Whatever depends on BoringSSL must be disabled on MIPS
-NON_MIPS_COMPONENTS = s/adb s/fastboot
-ifneq ($(filter amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
+NON_MIPS_COMPONENTS = s/adb s/adbd s/fastboot
+ifneq ($(filter amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
   COMPONENTS += $(NON_MIPS_COMPONENTS)
 endif
 
@@ -136,7 +136,7 @@ COMPONENTS_ANY_ARCH = \
   s/simg2img \
   s/simg2simg \
 
-ifeq ($(filter amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
+ifeq ($(filter amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
   COMPONENTS := $(filter $(COMPONENTS_ANY_ARCH), $(COMPONENTS))
 endif
 
@@ -190,10 +190,11 @@ override_dh_auto_build-arch: $(COMPONENTS)
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 override_dh_auto_test-arch:
 	debian/out/development/etc1tool development/tools/templates/ic_launcher_ldpi.png --encode && debian/out/development/etc1tool development/tools/templates/ic_launcher_ldpi.pkm --decode
-ifneq ($(filter amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
+ifneq ($(filter amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
 	LD_LIBRARY_PATH=debian/out/system debian/out/system/adb version
 	LD_LIBRARY_PATH=debian/out/system debian/out/system/adb help
 	LD_LIBRARY_PATH=debian/out/system debian/out/system/adb keygen key.txt && ls -l key.txt* && rm key.txt*
+	LD_LIBRARY_PATH=debian/out/system debian/out/system/adbd --version
 	LD_LIBRARY_PATH=debian/out/system debian/out/system/fastboot --version
 	LD_LIBRARY_PATH=debian/out/system debian/out/system/fastboot devices
 endif
@@ -203,10 +204,11 @@ override_dh_auto_install:
 	echo ignore upstream build system install procedure
 
 override_dh_auto_configure-arch:
-	rm -rf development/[a-s]* development/v* development/testrunner
+	rm -rf development/[a-s]* development/v* development/testrunner \
+		external/lzma/{Asm,CPP,CS,DOC,Java} external/lzma/C/*.c external/lzma/C/Util
 	mkdir -p debian/out/dalvik/tools debian/out/development debian/out/external \
 		debian/out/frameworks/native debian/out/system/extras debian/out/libnativehelper
-ifneq ($(filter amd64 i386 armel armhf arm64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
+ifneq ($(filter amd64 i386 armel armhf arm64 loong64 mipsel mips64el ppc64el riscv64,$(DEB_HOST_ARCH)),)
 	for proto in packages/modules/adb/fastdeploy/proto packages/modules/adb/proto; do \
 		(cd $$proto && \
 			find . -name '*.proto' -printf 'Regenerate %p\n' \
@@ -236,3 +238,6 @@ override_dh_gencontrol:
 	dh_gencontrol -pandroid-sdk-libsparse-utils -- -v1:$(DEB_VERSION)
 	dh_gencontrol -pfastboot -- -v1:$(DEB_VERSION)
 	dh_gencontrol -pmkbootimg -- -v1:$(DEB_VERSION)
+
+override_dh_installsystemd:
+	dh_installsystemd --no-stop-on-upgrade --no-restart-after-upgrade
