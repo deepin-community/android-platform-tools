@@ -1,3 +1,9 @@
+android-platform-tools (34.0.5-12deepin1) unstable; urgency=medium
+
+  * revert:Use 7z.so from 7zip to replace external/lzma. 
+
+ -- lichenggang <lichenggang@deepin.org>  Thu, 13 Nov 2025 14:46:02 +0800
+
 android-platform-tools (34.0.5-12) unstable; urgency=medium
 
   * debian/control:
